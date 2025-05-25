@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Typing Paragraph Game</title>
+  <style>
+    body {
+      font-family: 'Courier New', monospace;
+      padding: 50px;
+      background: #f0f0f0;
+      text-align: center;
+    }
+    #textDisplay {
+      margin: 20px auto;
+      max-width: 600px;
+      font-size: 18px;
+      line-height: 1.6;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+    }
+    .correct {
+      color: green;
+    }
+    .incorrect {
+      color: red;
+    }
+    #inputArea {
+      width: 600px;
+      height: 150px;
+      font-size: 18px;
+      padding: 10px;
+      margin-top: 20px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      resize: none;
+    }
+    #result {
+      margin-top: 30px;
+      font-size: 20px;
+    }
+    #retryBtn {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>Typing Paragraph Game</h1>
+  <div id="textDisplay"></div>
+  <textarea id="inputArea" placeholder="Start typing here..."></textarea>
+  <div id="result"></div>
+  <button id="retryBtn">Retry</button>
+
+  <script>
+    const paragraphs = [
+      "The quick brown fox jumps over the lazy dog.",
+      "Typing is a fundamental skill for computer users.",
+      "JavaScript is widely used to build interactive web applications.",
+      "Practice every day to improve your typing speed and accuracy.",
+      "Coding can be fun, especially when you build games like this one."
+    ];
+
+    const textDisplay = document.getElementById('textDisplay');
+    const inputArea = document.getElementById('inputArea');
+    const result = document.getElementById('result');
+    const retryBtn = document.getElementById('retryBtn');
+
+    let paragraph = '';
+    let startTime;
+    let ended = false;
+
+    function getRandomParagraph() {
+      const index = Math.floor(Math.random() * paragraphs.length);
+      return paragraphs[index];
+    }
+
+    function displayText() {
+      paragraph = getRandomParagraph();
+      textDisplay.innerHTML = '';
+      for (let char of paragraph) {
+        const span = document.createElement('span');
+        span.textContent = char;
+        textDisplay.appendChild(span);
+      }
+    }
+
+    function calculateResults() {
+      const elapsedTime = (new Date() - startTime) / 1000 / 60; // minutes
+      const words = paragraph.split(' ').length;
+      const typedText = inputArea.value;
+      let correctChars = 0;
+
+      for (let i = 0; i < typedText.length; i++) {
+        if (typedText[i] === paragraph[i]) correctChars++;
+      }
+
+      const accuracy = (correctChars / paragraph.length) * 100;
+      const wpm = Math.round(words / elapsedTime);
+
+      result.innerHTML = `
+        <p>Typing Speed: <strong>${wpm}</strong> WPM</p>
+        <p>Accuracy: <strong>${accuracy.toFixed(2)}%</strong></p>
+      `;
+    }
+
+    inputArea.addEventListener('input', () => {
+      const input = inputArea.value;
+
+      if (!startTime) startTime = new Date();
+
+      const spans = textDisplay.querySelectorAll('span');
+
+      for (let i = 0; i < spans.length; i++) {
+        const char = input[i];
+        const span = spans[i];
+
+        if (char == null) {
+          span.classList.remove('correct', 'incorrect');
+        } else if (char === span.textContent) {
+          span.classList.add('correct');
+          span.classList.remove('incorrect');
+        } else {
+          span.classList.add('incorrect');
+          span.classList.remove('correct');
+        }
+      }
+
+      if (input === paragraph && !ended) {
+        ended = true;
+        calculateResults();
+        inputArea.disabled = true;
+      }
+    });
+
+    retryBtn.addEventListener('click', () => {
+      ended = false;
+      inputArea.disabled = false;
+      inputArea.value = '';
+      result.innerHTML = '';
+      startTime = null;
+      displayText();
+      inputArea.focus();
+    });
+
+    displayText();
+  </script>
+</body>
+</html>
